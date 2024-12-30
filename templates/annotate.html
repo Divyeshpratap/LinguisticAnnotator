@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Annotate - Annotation App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function checkSelections() {
+            const s_nos = [
+                {% for row in rows %}
+                    "{{ row['S.No.'] }}"{{ "," if not loop.last else "" }}
+                {% endfor %}
+            ];
+            let allSelected = true;
+            for (let s_no of s_nos) {
+                const selected = document.querySelector('input[name="response_' + s_no + '"]:checked');
+                if (!selected) {
+                    allSelected = false;
+                    break;
+                }
+            }
+            document.getElementById('save-button').disabled = !allSelected;
+        }
+
+        window.onload = function() {
+            const radios = document.querySelectorAll('input[type="radio"]');
+            radios.forEach(radio => {
+                radio.addEventListener('change', checkSelections);
+            });
+            checkSelections();
+
+            // Prevent form submission if not all selections are made
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(event) {
+                const s_nos = [
+                    {% for row in rows %}
+                        "{{ row['S.No.'] }}"{{ "," if not loop.last else "" }}
+                    {% endfor %}
+                ];
+                let allSelected = true;
+                for (let s_no of s_nos) {
+                    const selected = document.querySelector('input[name="response_' + s_no + '"]:checked');
+                    if (!selected) {
+                        allSelected = false;
+                        break;
+                    }
+                }
+                if (!allSelected) {
+                    event.preventDefault();
+                    alert("Please select an option for all examples before proceeding.");
+                }
+            });
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Annotating as: {{ username }}</h2>
+            <a href="{{ url_for('logout') }}" class="switch-user">Switch User</a>
+        </div>
+        <div class="content">
+            <!-- Sidebar for Progress Tracking -->
+            <div class="sidebar">
+                <h3>Progress</h3>
+                <ul>
+                    {% for cls in classes %}
+                        <li>
+                            <a href="{{ url_for('annotate', page=loop.index) }}" class="{{ 'completed' if cls.completed else 'incomplete' }}">
+                                Class {{ cls.class_number }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <!-- Main Content Area -->
+            <div class="main">
+                {% if error %}
+                    <p class="error">{{ error }}</p>
+                {% endif %}
+                <h3>VerbNet Class Number: {{ class_number }}</h3>
+                <form method="post" action="{{ url_for('annotate') }}">
+                    <input type="hidden" name="page" value="{{ page }}">
+                    {% for row in rows %}
+                        <div class="example">
+                            <h4>Subcategory_id: {{ row['Subcategory_id'] }}</h4>
+                            <p><strong>Sentence</strong>
+                                {% set sentence = row['Examples'] %}
+                                {% set sentence = sentence.strip("[]").strip("'") %}
+                                {% set focus_word = row['Focus Word'] %}
+                                {% set highlighted = sentence.replace(focus_word, '<span class="highlight">' ~ focus_word ~ '</span>') %}
+                                {{ highlighted | safe }}
+                            </p>
+                            <div class="options">
+                                <label>
+                                    <input type="radio" name="response_{{ row['S.No.'] }}" value="result" {% if responses[row['S.No.']] == 'result' %}checked{% endif %}>
+                                    Result
+                                </label>
+                                <label>
+                                    <input type="radio" name="response_{{ row['S.No.'] }}" value="manner" {% if responses[row['S.No.']] == 'manner' %}checked{% endif %}>
+                                    Manner
+                                </label>
+                                <label>
+                                    <input type="radio" name="response_{{ row['S.No.'] }}" value="stative" {% if responses[row['S.No.']] == 'stative' %}checked{% endif %}>
+                                    Stative
+                                </label>
+                                <label>
+                                    <input type="radio" name="response_{{ row['S.No.'] }}" value="Not Sure" {% if responses[row['S.No.']] == 'Not Sure' %}checked{% endif %}>
+                                    Not Sure
+                                </label>
+                                <label>
+                                    <input type="radio" name="response_{{ row['S.No.'] }}" value="Both result and manner" {% if responses[row['S.No.']] == 'Both result and manner' %}checked{% endif %}>
+                                    Both Result and Manner
+                                </label>
+                                <input type="hidden" name="s_no" value="{{ row['S.No.'] }}">
+                            </div>                            
+                            <p><strong>Members:</strong> {{ row['Members'].strip("[]").replace("'", "").replace(", ", "', '") }}</p>
+                            <p><strong>Link:</strong> <a href="{{ row['URL'] }}" target="_blank">{{ row['URL'] }}</a></p>
+                        </div>
+                    {% endfor %}
+                    <div class="navigation">
+                        {% if page > 1 %}
+                            <a href="{{ url_for('annotate', page=page-1) }}" class="button">Previous</a>
+                        {% endif %}
+                        <button type="submit" id="save-button" class="button">Save and Proceed</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
