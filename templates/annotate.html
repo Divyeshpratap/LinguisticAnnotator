@@ -79,12 +79,13 @@
                     <p class="error">{{ error }}</p>
                 {% endif %}
                 <h3>VerbNet Class Number: {{ class_number }}</h3>
+                <p>Note: You will have to annotate all examples before proceeding to next page</p>
                 <form method="post" action="{{ url_for('annotate') }}">
                     <input type="hidden" name="page" value="{{ page }}">
                     {% for row in rows %}
                         <div class="example">
                             <h4>Subcategory_id: {{ row['Subcategory_id'] }}</h4>
-                            <p><strong>Sentence</strong>
+                            <p><strong>Sentence:</strong>
                                 {% set sentence = row['Examples'] %}
                                 {% set sentence = sentence.strip("[]").strip("'") %}
                                 {% set focus_word = row['Focus Word'] %}
@@ -108,14 +109,14 @@
                                     <input type="radio" name="response_{{ row['S.No.'] }}" value="Not Sure" {% if responses[row['S.No.']] == 'Not Sure' %}checked{% endif %}>
                                     Not Sure
                                 </label>
-                                <label>
+                                <!-- <label>
                                     <input type="radio" name="response_{{ row['S.No.'] }}" value="Both result and manner" {% if responses[row['S.No.']] == 'Both result and manner' %}checked{% endif %}>
                                     Both Result and Manner
-                                </label>
+                                </label> -->
                                 <input type="hidden" name="s_no" value="{{ row['S.No.'] }}">
                             </div>                            
-                            <p><strong>Members:</strong> {{ row['Members'].strip("[]").replace("'", "").replace(", ", "', '") }}</p>
-                            <p><strong>Link:</strong> <a href="{{ row['URL'] }}" target="_blank">{{ row['URL'] }}</a></p>
+                            <!-- <p><strong>Members:</strong> {{ row['Members'].strip("[]").replace("'", "").replace(", ", "', '") }}</p>
+                            <p><strong>Link:</strong> <a href="{{ row['URL'] }}" target="_blank">{{ row['URL'] }}</a></p> -->
                         </div>
                     {% endfor %}
                     <div class="navigation">

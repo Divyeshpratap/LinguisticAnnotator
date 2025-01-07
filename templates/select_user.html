@@ -4,13 +4,27 @@
     <meta charset="UTF-8">
     <title>Select User - Annotation App</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Optional styling for instructions and PDF embed */
+        .instructions {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .pdf-container {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .pdf-container embed {
+            border: 1px solid #ccc;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h2>Who is annotating?</h2>
-        {% if error %}
-            <p class="error">{{ error }}</p>
-        {% endif %}
+        <h2>Who is annotating? (Click on your I-D to start annotating)</h2>
         <form method="post" action="{{ url_for('handle_select_user') }}">
             <div class="user-buttons">
                 {% for user in users %}
@@ -18,6 +32,28 @@
                 {% endfor %}
             </div>
         </form>
+        <!-- Instructions Section -->
+        <div class="instructions">
+            <p><strong>Before proceeding with the verb annotation task, please go through the below definitions of result and manner verbs.</strong></p>
+            <p>Verbs can be classified into two categories:</p>
+            <p><strong>1: Non-Stative Verbs</strong><br>
+               1.1: Manner verbs: Lexicalize the manner in which an action/event takes place (e.g: cry, hit, pound, run, shout, shovel, smear, sweep, etc.).<br>
+               1.2: Result verbs: Lexicalize the result or outcome of an event (e.g., arrive, clean, come, cover, die, empty, fill, put, remove, etc.).
+            </p>
+            <p><strong>2: Stative Verbs:</strong> Stative verbs describe a state rather than an action. They aren't usually used in the present continuous form.<br>
+               I don't know the answer. I'm not knowing the answer.<br>
+               She really likes you. She's really liking you.
+            </p>
+            <p>Also we highly recommend you to please refer the below PDF (only 2 pages) to get an understanding on result-manner verbs by the original authors.</p>
+            <div class="pdf-container">
+                <embed src="{{ url_for('static', filename='resultMannerIdea.pdf') }}" type="application/pdf" width="600" height="400">
+                <p>If the PDF is not visible, you can <a href="{{ url_for('static', filename='resultMannerIdea.pdf') }}" target="_blank">download it here</a>.</p>
+            </div>
+            <p><strong> Thank you for your time!</strong></p>
+        </div>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
     </div>
 </body>
 </html>
